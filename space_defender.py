@@ -22,9 +22,8 @@ pygame.mixer.music.play(-1, 0.0)  # -1 is parameter for forever loop, 0.0 is wha
 ENEMY_LASER_SOUND = pygame.mixer.Sound(os.path.join('material', 'enemy_laser.wav'))  # 36cc loading sounds
 PLAYER_LASER_SOUND = pygame.mixer.Sound(os.path.join('material', 'player_laser.wav'))
 SHIP_COLLISION_SOUND = pygame.mixer.Sound(os.path.join('material', 'collision_ships.wav'))  # collision with ships
-PLAYER_DAMAGED_SOUND = pygame.mixer.Sound(os.path.join('material', 'player_damaged.wav'))
-pygame.mixer.Sound.set_volume(PLAYER_LASER_SOUND, 0.2)  # 36ccc adjusting volume
-pygame.mixer.Sound.set_volume(ENEMY_LASER_SOUND, 0.1)
+pygame.mixer.Sound.set_volume(PLAYER_LASER_SOUND, 0.5)  # 36ccc adjusting volume
+pygame.mixer.Sound.set_volume(ENEMY_LASER_SOUND, 0.3)
 
 
 RED_LASER = pygame.image.load(os.path.join('material', 'pixel_laser_red.png'))
@@ -271,7 +270,6 @@ def main():  # 3
                 player.health -= 10  # then subtract 10 health from player
                 enemies.remove(enemy)  # remove enemy from enemies list
                 SHIP_COLLISION_SOUND.play()  # if we collide our ship with enemy ships
-
             elif enemy.y + enemy.get_height() > HEIGHT:  # 21c we check the enemies height pos, to remove them from our
                 lives -= 1  # list, and remove 1 hp from our lives, in order to be able to spawn new enemies
                 enemies.remove(enemy)  # removes object "enemy" from the "enemies" list
