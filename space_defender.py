@@ -3,6 +3,7 @@ import os
 import time
 import random
 
+pygame.mixer.init()  # 36 sound library
 pygame.font.init()  # 6 allows us to access fonts, and start writing on the screen
 
 WIDTH, HEIGHT = 1600, 1300  # 1
@@ -15,6 +16,16 @@ RED_SPACE_SHIP = pygame.image.load(os.path.join('material', 'pixel_ship_red_smal
 GREEN_SPACE_SHIP = pygame.image.load(os.path.join('material', 'pixel_ship_green_small.png'))
 BLUE_SPACE_SHIP = pygame.image.load(os.path.join('material', 'pixel_ship_blue_small.png'))
 YELLOW_SPACE_SHIP = pygame.image.load(os.path.join('material', 'pixel_ship_yellow.png'))
+
+pygame.mixer.music.load(os.path.join('material', 'music.mp3'))  # 36ccc c background music
+pygame.mixer.music.play(-1, 0.0)  # -1 is parameter for forever loop, 0.0 is what second you want the music to play from
+ENEMY_LASER_SOUND = pygame.mixer.Sound(os.path.join('material', 'enemy_laser.wav'))  # 36cc loading sounds
+PLAYER_LASER_SOUND = pygame.mixer.Sound(os.path.join('material', 'player_laser.wav'))
+SHIP_COLLISION_SOUND = pygame.mixer.Sound(os.path.join('material', 'collision_ships.wav'))  # collision with ships
+PLAYER_DAMAGED_SOUND = pygame.mixer.Sound(os.path.join('material', 'player_damaged.wav'))
+pygame.mixer.Sound.set_volume(PLAYER_LASER_SOUND, 0.2)  # 36ccc adjusting volume
+pygame.mixer.Sound.set_volume(ENEMY_LASER_SOUND, 0.1)
+
 
 RED_LASER = pygame.image.load(os.path.join('material', 'pixel_laser_red.png'))
 GREEN_LASER = pygame.image.load(os.path.join('material', 'pixel_laser_green.png'))
@@ -47,7 +58,8 @@ class Laser:  # 23
         self.y += vel  # if we want to go down, we pass in a positive vel, if the lasers goes up we pass in negative vel
 
     def off_screen(self, height):  # 23ccc whenever lasers are off screen, based of the height of the screen
-        return not(self.y <= height and self.y >= 0)  # if it's off the screen, then True, if not off screen, then False
+        return not (
+                self.y <= height and self.y >= 0)  # if it's off the screen, then True, if not off screen, then False
 
     def collision(self, obj):  # 23ccc returns whether we've collided with anything or not
         return collide(obj, self)  # must create function for "collide"
@@ -130,7 +142,7 @@ class Player(Ship):  # 12 new class, inherits from "Ship", and takes Ships draw 
                                        self.ship_img.get_width(), 10))  # adding 10 pixels to the pos, to make the bar
         # appear a bit below the spaceship, rather than right on it
         pygame.draw.rect(window, GREEN, (self.x, self.y + self.ship_img.get_height() + 10,
-                                         self.ship_img.get_width() * (self.health/self.max_health), 10))  # making
+                                         self.ship_img.get_width() * (self.health / self.max_health), 10))  # making
         # green bar on top of red bar, subtracting by percentage of health divided by max health
 
 
@@ -153,7 +165,7 @@ class Enemy(Ship):  # 15 inherit from parent class: Ship
 
     def shoot(self):  # 30 overriding shoot method here, since we want to adjust lasers on the enemy
         if self.cool_down_counter == 0:
-            laser = Laser(self.x-15, self.y, self.laser_img)  # subtract any desired pixels, to center the lasers
+            laser = Laser(self.x - 15, self.y, self.laser_img)  # subtract any desired pixels, to center the lasers
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -201,7 +213,8 @@ def main():  # 3
         player.draw(WIN)  # 9 call player, draw it, on the window (WIN)
         if lost:  # 22cc if "lost" turns True, we access this line
             lost_label = lost_font.render('You lost, kyni!', 1, PINK)
-            WIN.blit(lost_label, (WIDTH/2 - lost_label.get_width()/2, 650))  # center of screen will be width/2 minus
+            WIN.blit(lost_label,
+                     (WIDTH / 2 - lost_label.get_width() / 2, 650))  # center of screen will be width/2 minus
             # the width of the label which is also divided by 2, and 2nd argument is y pos
 
         pygame.display.update()  # 5
@@ -225,7 +238,7 @@ def main():  # 3
             level += 1
             wave_length += 5  # 20  # we add this many more enemies with every wave
             for i in range(wave_length):  # 20c we're using random.randrange to make enemies spawn at random locations
-                enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(  # from off the screen from above
+                enemy = Enemy(random.randrange(50, WIDTH - 100), random.randrange(  # from off the screen from above
                     -500, -100), random.choice(  # we pass in x pos, y pos, and let it choose from a random color
                     ["red", "green", "blue"]))  # we can change the positions of ships to spawn dynamically as we reach
                 # higher levels if we want to, i.e. "-1500*level*2" or whatever we may find balanced
@@ -246,15 +259,19 @@ def main():  # 3
             player.y += VEL  # is less than height, if VEL += is added on y axis, and need to + the velocity
         if keys[pygame.K_SPACE]:
             player.shoot()  # 27 we call the shoot method here, and will create a laser if the CD is 0
+            PLAYER_LASER_SOUND.play()  # 36 play laser sound
 
         for enemy in enemies[:]:  # 21 our enemies move down now by calling them here - we make a copy of list with [:]
             enemy.move(enemy_vel)
             enemy.move_lasers(laser_vel, player)  # 30 move lasers here, check if we hit player object as 2nd argument
-            if random.randrange(0, 2*60) == 1:  # 31 the probability for enemy to shoot for each frame, from 0 to
+            if random.randrange(0, 2 * 60) == 1:  # 31 the probability for enemy to shoot for each frame, from 0 to
                 enemy.shoot()  # whatever we want - multiply by 60, would make them shoot x times per second
+                ENEMY_LASER_SOUND.play()
             if collide(enemy, player):  # 32 if there's a collision, parameters are enemy and player
                 player.health -= 10  # then subtract 10 health from player
                 enemies.remove(enemy)  # remove enemy from enemies list
+                SHIP_COLLISION_SOUND.play()  # if we collide our ship with enemy ships
+
             elif enemy.y + enemy.get_height() > HEIGHT:  # 21c we check the enemies height pos, to remove them from our
                 lives -= 1  # list, and remove 1 hp from our lives, in order to be able to spawn new enemies
                 enemies.remove(enemy)  # removes object "enemy" from the "enemies" list
@@ -269,7 +286,8 @@ def main_menu():  # 35
     while run:
         WIN.blit(BACKGROUND, (0, 0))  # making the background appear at x pos 0 and y pos 0
         title_label = title_font.render("Kyni, press the mouse to begin...", 1, LEMON)
-        WIN.blit(title_label, (WIDTH/2 - title_label.get_width()/2, 150))  # appear at width/2 minus titles width/2, y
+        WIN.blit(title_label,
+                 (WIDTH / 2 - title_label.get_width() / 2, 150))  # appear at width/2 minus titles width/2, y
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
