@@ -22,8 +22,10 @@ pygame.mixer.music.play(-1, 0.0)  # -1 is parameter for forever loop, 0.0 is wha
 ENEMY_LASER_SOUND = pygame.mixer.Sound(os.path.join('material', 'enemy_laser.wav'))  # 36cc loading sounds
 PLAYER_LASER_SOUND = pygame.mixer.Sound(os.path.join('material', 'player_laser.wav'))
 SHIP_COLLISION_SOUND = pygame.mixer.Sound(os.path.join('material', 'collision_ships.wav'))  # collision with ships
+NEXT_LEVEL = pygame.mixer.Sound(os.path.join('material', 'next_level.wav'))
 pygame.mixer.Sound.set_volume(PLAYER_LASER_SOUND, 0.5)  # 36ccc adjusting volume
 pygame.mixer.Sound.set_volume(ENEMY_LASER_SOUND, 0.3)
+pygame.mixer.Sound.set_volume(NEXT_LEVEL, 1)
 
 
 RED_LASER = pygame.image.load(os.path.join('material', 'pixel_laser_red.png'))
@@ -242,6 +244,7 @@ def main():  # 3
                     ["red", "green", "blue"]))  # we can change the positions of ships to spawn dynamically as we reach
                 # higher levels if we want to, i.e. "-1500*level*2" or whatever we may find balanced
                 enemies.append(enemy)  # 20cc we add enemies to the enemy list, using append
+                NEXT_LEVEL.play()
 
         for event in pygame.event.get():  # 5 allows us to quit the game, when X button is pressed
             if event.type == pygame.QUIT:
